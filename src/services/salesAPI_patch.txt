@@ -1,0 +1,23 @@
+// ── ADD THIS METHOD to the salesAPI section in frontend/src/services/api.js ──
+// Find this block:
+//
+//   export const salesAPI = {
+//     getAll: ...
+//     getById: ...
+//     create: ...
+//     getSummary: ...
+//     downloadInvoice: ...
+//     processReturn: ...
+//   };
+//
+// Replace it with:
+
+export const salesAPI = {
+  getAll:          (params) => api.get('/sales', { params }),
+  getById:         (id)     => api.get(`/sales/${id}`),
+  create:          (data)   => api.post('/sales', data),
+  getSummary:      (params) => api.get('/sales/summary', { params }),
+  downloadInvoice: (id)     => api.get(`/sales/${id}/invoice`, { responseType: 'blob' }),
+  processReturn:   (id, data) => api.post(`/sales/${id}/return`, data),
+  updateStatus:    (id, data) => api.patch(`/sales/${id}/status`, data),   // ← NEW
+};
