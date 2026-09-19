@@ -24,7 +24,7 @@ import { SHOP_NAME, SHOP_TAGLINE, SHOP_PHONES } from '../../config/tenant';
 const NAV = [
   ['Home',       '/'],
   ['Shop',       '/products'],
-  ['Combos',     '/products?combo=1'],
+   ['Combos',     '/combos'],
   ['Offers',     '/offers'],
   ['Price List', '/price-list'],
   ['About',      '/about'],

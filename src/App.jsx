@@ -1,10 +1,7 @@
 // src/App.jsx
 // COMPLETE FILE — replace your existing one.
 //
-// Adds the two routes the redesign links to but that were never
-// registered, which is why you saw "No routes matched location":
-//   /product/:id   ← ProductCard navigates here
-//   /offers        ← header nav links here
+// Adds the /combos route for the new Combo Collection page.
 
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -22,6 +19,7 @@ import HomePage          from './pages/HomePage';
 import ProductsPage      from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import OffersPage        from './pages/OffersPage';
+import CombosPage        from './pages/CombosPage';   // ← NEW
 import CheckoutPage      from './pages/CheckoutPage';
 import OrdersPage        from './pages/OrdersPage';
 import OrderDetailPage   from './pages/OrderDetailPage';
@@ -67,6 +65,7 @@ export default function App() {
             <Route path="/products"    element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/offers"      element={<OffersPage />} />
+            <Route path="/combos"      element={<CombosPage />} />   {/* ← NEW */}
             <Route path="/price-list"  element={<PriceListPage />} />
             <Route path="/about"       element={<AboutPage />} />
             <Route path="/contact"     element={<ContactPage />} />
