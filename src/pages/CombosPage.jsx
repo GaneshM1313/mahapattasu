@@ -13,32 +13,6 @@ import { ADMIN_WHATSAPP_NUMBER } from '../config/tenant';
 import comboPosters from '../data/comboPosters';
 import './CombosPage.css';
 
-/* ---- product-name → emoji icon ---- */
-function icon(n) {
-  n = n.toLowerCase();
-  const m = [
-    ['bijil','⚡'],['bijli','⚡'],['bijili','⚡'],['bites','⚡'],
-    ['paper bomb','🧨'],['bullet','💣'],['hydro','💣'],['classic bomb','💣'],['555','💣'],['digital bomb','💣'],
-    ['rocket','🚀'],['sky shot','🚀'],['bomb','💣'],
-    ['lakshmi','🪔'],['delux','🪔'],['adiyal','🪔'],['kuruvi','🐦'],['wala','🎇'],['lar','🎇'],
-    ['chakkar','🌀'],['chakaram','🌀'],['chakram','🌀'],['wheel','🌀'],['disco','🌀'],['spinner','🌀'],
-    ['flower pot','🌸'],['flower','🌸'],['koti','🌺'],
-    ['twinkling','⭐'],['twinkle','⭐'],['sizzling','✨'],['sparkl','✨'],
-    ['electric','🎇'],['electeic','🎇'],['electr','🎇'],['green','🎇'],['red','🎇'],['crackling','🎆'],
-    ['peacock','🦚'],['helicopter','🚁'],['butterfly','🦋'],['pencil','✏️'],['emu','🥚'],['serp','🥚'],['egg','🥚'],
-    ['fountain','⛲'],['golden drop','💧'],['golden flower','🌼'],['lilly','🌷'],['magic pop','🎉'],['magical','🦚'],['magic','🎇'],
-    ['fancy pipe','🎆'],['pipe','🎆'],['step','🎆'],['shot','🎆'],['rider','🏇'],['multi','🌈'],['color','🌈'],['colour','🌈'],['tri color','🌈'],['tricolor','🌈'],
-    ['dora','🎵'],['singer','🎵'],['music','🎵'],['rock star','🎸'],['top gun','🔫'],['pistol','🔫'],['gun','🔫'],
-    ['water queen','💦'],['money bank','🐷'],['money','💰'],['kit kat','🍫'],['pop corn','🍿'],['popcorn','🍿'],
-    ['cartoon','🧸'],['kung fu','🐼'],['panda','🐼'],['shin chan','🧒'],['zee boom','💥'],['bambaram','🌀'],
-    ['rainbow','🌈'],['smoke','💨'],['photo flash','📸'],['selfie','🤳'],['spectra','🌈'],['vel','🔱'],
-    ['garba','💃'],['watt','💡'],['stone','🪨'],['tin','🥁'],['tirumala','🛕'],['robin','🍹'],['7up','🍹'],
-    ['ranga','🌋'],['lava','🌋'],['titto','🎇'],['fruit','🍓'],['malli','🌼'],['show','🎪'],['pops','🎉'],['king','👑'],
-    ['match','🎁'],['serpent','🐍'],['serphent','🐍'],
-  ];
-  for (const [k, e] of m) if (n.includes(k)) return e;
-  return '🎆';
-}
 const money = (n) => '₹' + n.toLocaleString('en-IN');
 const P = (n, q) => ({ n, q });
 
@@ -139,7 +113,6 @@ export default function CombosPage() {
   const [qty, setQty]           = useState(1);
   const [activeCat, setActiveCat] = useState(0);
 
-  const canvasRef = useRef(null);
   const sheetRef  = useRef(null);
   const gridRef   = useRef(null);
 
@@ -173,42 +146,6 @@ export default function CombosPage() {
     return () => io.disconnect();
   }, []);
 
-  /* hero fireworks */
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-    const cv = canvasRef.current; if (!cv) return;
-    const ctx = cv.getContext('2d');
-    let W, H, parts = [], rockets = [], raf, last = 0, running = true;
-    const DPR = window.devicePixelRatio || 1;
-    const COLORS = ['#ffd24a','#ff5c7a','#5fd0ff','#8b6bff','#5bd07a','#ff7a1a','#ffffff'];
-    const size = () => { W = cv.width = cv.offsetWidth * DPR; H = cv.height = cv.offsetHeight * DPR; };
-    size(); window.addEventListener('resize', size);
-    const burst = (x, y) => {
-      const col = COLORS[Math.random() * COLORS.length | 0], n = 42 + Math.random() * 26;
-      for (let i = 0; i < n; i++) { const a = (Math.PI * 2 * i) / n, sp = (1.6 + Math.random() * 3.2) * DPR;
-        parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, col, sz: (1.4 + Math.random() * 1.8) * DPR }); }
-    };
-    const launch = () => rockets.push({ x: (0.15 + Math.random() * 0.7) * W, y: H, ty: (0.16 + Math.random() * 0.4) * H, vy: (-7 - Math.random() * 3) * DPR });
-    const loop = (t) => {
-      raf = requestAnimationFrame(loop);
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = 'rgba(10,6,32,.22)'; ctx.fillRect(0, 0, W, H);
-      ctx.globalCompositeOperation = 'lighter';
-      if (t - last > 720) { launch(); last = t; }
-      rockets.forEach((r, i) => { r.y += r.vy; r.vy += 0.06 * DPR;
-        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(r.x, r.y, 2 * DPR, 0, 7); ctx.fill();
-        if (r.y <= r.ty || r.vy >= 0) { burst(r.x, r.y); rockets.splice(i, 1); } });
-      parts.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.vy += 0.045 * DPR; p.vx *= 0.985; p.vy *= 0.985; p.life -= 0.011;
-        if (p.life <= 0) { parts.splice(i, 1); return; }
-        ctx.globalAlpha = Math.max(p.life, 0); ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, 7); ctx.fill(); });
-      ctx.globalAlpha = 1;
-    };
-    raf = requestAnimationFrame(loop);
-    const vis = () => { if (document.hidden) { cancelAnimationFrame(raf); } else if (running) { raf = requestAnimationFrame(loop); } };
-    document.addEventListener('visibilitychange', vis);
-    return () => { running = false; cancelAnimationFrame(raf); window.removeEventListener('resize', size); document.removeEventListener('visibilitychange', vis); };
-  }, []);
-
   /* actions */
   const openDetail = (id) => { setActiveId(id); setQty(1); setActiveCat(0); if (sheetRef.current) sheetRef.current.scrollTop = 0; };
   const closeDetail = () => setActiveId(null);
@@ -237,30 +174,7 @@ export default function CombosPage() {
   };
 
   return (
-    <div className="mp-combos">
-      {/* ---------------- HERO ---------------- */}
-      <header className="mp-hero">
-        <canvas ref={canvasRef} className="mp-fx" />
-        <span className="mp-spark" style={{ left: '8%', top: '22%' }}>🎆</span>
-        <span className="mp-spark" style={{ right: '10%', top: '18%', animationDelay: '1.4s' }}>🧨</span>
-        <span className="mp-spark" style={{ left: '14%', bottom: '16%', animationDelay: '2.1s' }}>✨</span>
-        <span className="mp-spark" style={{ right: '16%', bottom: '20%', animationDelay: '.7s' }}>🎇</span>
-        <span className="mp-spark" style={{ left: '48%', top: '12%', animationDelay: '3s' }}>🪔</span>
-        <div className="mp-heroin">
-          <span className="mp-kicker">🪔 The King of Crackers · Sivakasi</span>
-          <h1 className="mp-display">MAHA PATTASU<br /><span className="mp-r">COMBO COLLECTION</span></h1>
-          <p className="mp-sub">More Crackers <b>·</b> More Colours <b>·</b> More Happiness</p>
-          <p className="mp-support">Choose your perfect Diwali celebration pack</p>
-          <button className="mp-cta" onClick={() => gridRef.current?.scrollIntoView({ behavior: 'smooth' })}>Explore combo packs →</button>
-          <div className="mp-hstats">
-            <div><div className="n">5</div><div className="l">Combo packs</div></div>
-            <div><div className="n">₹3,000+</div><div className="l">Starting price</div></div>
-            <div><div className="n">100%</div><div className="l">Branded quality</div></div>
-            <div><div className="n">Free</div><div className="l">Gift box</div></div>
-          </div>
-        </div>
-      </header>
-
+    <div className="mp-combos page-top">
       {/* ---------------- COMBO GRID ---------------- */}
       <section className="mp-section">
         <div className="mp-wrap">
@@ -374,9 +288,8 @@ export default function CombosPage() {
                     <div className="mp-prodgrid">
                       {ct.p.map((pr, j) => (
                         <div className="mp-prod" key={j}>
-                          <div className="ic">{icon(pr.n)}</div>
                           <div className="pn">{pr.n}</div>
-                          <div className="qt">📦 {pr.q}</div>
+                          <div className="qt">{pr.q}</div>
                         </div>
                       ))}
                     </div>

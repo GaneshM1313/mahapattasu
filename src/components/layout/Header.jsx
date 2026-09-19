@@ -24,7 +24,7 @@ import { SHOP_NAME, SHOP_TAGLINE, SHOP_PHONES } from '../../config/tenant';
 const NAV = [
   ['Home',       '/'],
   ['Shop',       '/products'],
-   ['Combos',     '/combos'],
+  ['Combos',     '/combos'],
   ['Offers',     '/offers'],
   ['Price List', '/price-list'],
   ['About',      '/about'],
@@ -103,9 +103,22 @@ export default function Header() {
       <div className="flex items-center justify-center flex-shrink-0"
         style={{
           width: 40, height: 40, borderRadius: 12,
-          background: 'var(--grad-fire)', boxShadow: 'var(--sh-glow)', fontSize: 21,
+          background: 'var(--grad-fire)', boxShadow: 'var(--sh-glow)',
         }}>
-        🎆
+        {/* Maha Pattasu firework mark — crisp on every device (no emoji) */}
+        <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <g stroke="#fff" strokeWidth="1.9" strokeLinecap="round">
+            <line x1="12" y1="2.5" x2="12" y2="7.5" />
+            <line x1="12" y1="16.5" x2="12" y2="21.5" />
+            <line x1="2.5" y1="12" x2="7.5" y2="12" />
+            <line x1="16.5" y1="12" x2="21.5" y2="12" />
+            <line x1="5.5" y1="5.5" x2="8.9" y2="8.9" />
+            <line x1="15.1" y1="15.1" x2="18.5" y2="18.5" />
+            <line x1="18.5" y1="5.5" x2="15.1" y2="8.9" />
+            <line x1="8.9" y1="15.1" x2="5.5" y2="18.5" />
+          </g>
+          <circle cx="12" cy="12" r="2.5" fill="#ffd60a" />
+        </svg>
       </div>
       {!compact && (
         <div className="hidden sm:block leading-none">
@@ -341,8 +354,16 @@ export default function Header() {
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <span className="flex items-center justify-center"
-                      style={{ width:42, height:42, borderRadius:12, background:'var(--grad-fire)', fontSize:22 }}>
-                      🎆
+                      style={{ width:42, height:42, borderRadius:12, background:'var(--grad-fire)' }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <g stroke="#fff" strokeWidth="1.9" strokeLinecap="round">
+                          <line x1="12" y1="2.5" x2="12" y2="7.5" /><line x1="12" y1="16.5" x2="12" y2="21.5" />
+                          <line x1="2.5" y1="12" x2="7.5" y2="12" /><line x1="16.5" y1="12" x2="21.5" y2="12" />
+                          <line x1="5.5" y1="5.5" x2="8.9" y2="8.9" /><line x1="15.1" y1="15.1" x2="18.5" y2="18.5" />
+                          <line x1="18.5" y1="5.5" x2="15.1" y2="8.9" /><line x1="8.9" y1="15.1" x2="5.5" y2="18.5" />
+                        </g>
+                        <circle cx="12" cy="12" r="2.5" fill="#ffd60a" />
+                      </svg>
                     </span>
                     <div className="leading-tight">
                       <p className="font-display font-black text-white text-base">{SHOP_NAME}</p>

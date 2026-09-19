@@ -25,7 +25,8 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRightIcon, SparklesIcon, GiftIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, GiftIcon } from '@heroicons/react/24/outline';
+import heroBanner from '../../data/heroBanner';
 
 /* Set to a URL to composite a real photo behind the animated layers */
 const BG_IMAGE = null;
@@ -153,7 +154,7 @@ const BOXES = [
   { emoji:'🌸', label:'Flower Pot', grad:'linear-gradient(145deg,#ff70a6,#ef233c)', x:'2%',  y:'44%', size:54, delay:2.1, rot:-13 },
 ];
 
-export default function Hero({ offer }) {
+export default function Hero() {
   const bursts = useMemo(() => ([
     { cx:175,  cy:130, scale:1.15, p:0, delay:0,   dur:4.2 },
     { cx:640,  cy:95,  scale:.92,  p:2, delay:1.1, dur:4.8 },
@@ -180,7 +181,7 @@ export default function Hero({ offer }) {
   const diyas = useMemo(() => Array.from({ length: 11 }, (_, i) => ({ delay: (i % 6) * .22 })), []);
 
   return (
-    <section className="relative overflow-hidden" style={{ minHeight:'clamp(460px, 72vh, 700px)' }}>
+    <section className="relative overflow-hidden flex flex-col justify-center" style={{ minHeight:'clamp(400px, 60vh, 640px)' }}>
 
       {/* 1 · Night sky */}
       <div className="absolute inset-0" style={{
@@ -286,83 +287,44 @@ export default function Hero({ offer }) {
         </motion.div>
       ))}
 
-      {/* 10 · Content */}
-      <div className="wrap relative z-10 py-16 md:py-24">
-        <div className="max-w-2xl md:mx-auto md:text-center">
-
-          <motion.p initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }}
-            className="font-tamil mb-3"
-            style={{
-              color:'#ffd60a', fontWeight:700, fontSize:'clamp(1.15rem, 2.6vw, 1.5rem)',
-              textShadow:'0 2px 18px rgba(255,183,3,.45)',
-            }}>
-            இனிய தீபாவளி நல்வாழ்த்துக்கள்! 🪔
-          </motion.p>
-
-          {offer ? (
-            <motion.div initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }}
-              className="inline-flex items-center gap-2 mb-5"
-              style={{
-                background:'var(--grad-gold)', color:'var(--deep-red)',
-                padding:'7px 17px', borderRadius:999, fontWeight:900,
-                fontSize:'.75rem', letterSpacing:'.04em',
-                boxShadow:'0 8px 26px rgba(255,183,3,.5)',
-              }}>
-              <SparklesIcon className="h-4 w-4" />
-              {offer.value}% OFF EVERYTHING · {offer.name}
-            </motion.div>
-          ) : (
-            <motion.div initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }}
-              className="inline-flex items-center gap-2 mb-5"
-              style={{
-                background:'rgba(255,255,255,.09)', border:'1px solid rgba(255,214,10,.4)',
-                color:'#ffd60a', padding:'6px 16px', borderRadius:999,
-                fontWeight:800, fontSize:'.688rem', letterSpacing:'.13em',
-                backdropFilter:'blur(6px)',
-              }}>
-              🎆 SIVAKASI DIRECT · SINCE 2010
-            </motion.div>
-          )}
-
-          <motion.h1 initial={{ opacity:0, y:24 }} animate={{ opacity:1, y:0 }} transition={{ delay:.08 }}
-            className="h-display text-white mb-5" style={{ textShadow:'0 4px 40px rgba(0,0,0,.55)' }}>
-            🪔 Celebrate Diwali<br />
-            <span style={{
-              background:'linear-gradient(100deg,#ffd60a,#ff6b35,#ff2d55)',
-              WebkitBackgroundClip:'text', backgroundClip:'text',
-              WebkitTextFillColor:'transparent',
-            }}>with Big Savings</span>
-          </motion.h1>
-
-          <motion.p initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }} transition={{ delay:.16 }}
-            className="text-base md:text-lg mb-8 md:mx-auto max-w-lg leading-relaxed"
-            style={{ color:'rgba(255,255,255,.76)' }}>
-            Premium crackers straight from the factories of Sivakasi.
-            Best prices, genuine products, combo packs for the whole family.
-          </motion.p>
-
-          <motion.div initial={{ opacity:0, y:18 }} animate={{ opacity:1, y:0 }} transition={{ delay:.24 }}
-            className="flex flex-wrap gap-3 md:justify-center">
-            <Link to="/products" className="btn btn-fire btn-lg">
-              Shop Now <ArrowRightIcon className="h-5 w-5" />
-            </Link>
-            <Link to="/products?combo=1" className="btn btn-lg"
-              style={{
-                background:'rgba(255,255,255,.12)', color:'#fff',
-                border:'2px solid rgba(255,255,255,.28)', backdropFilter:'blur(8px)',
-              }}>
-              <GiftIcon className="h-5 w-5" /> View Combos
+      {/* 10 · Content — uploaded banner over the animated fireworks background */}
+      <div className="wrap relative z-10 py-8 md:py-12">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 22, scale: .97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: .1, type: 'spring', damping: 16 }}
+          >
+            <Link to="/products" aria-label="Shop Maha Pattasu crackers online" className="block">
+              <img
+                src={heroBanner}
+                alt="Maha Pattasu — Online Crackers Store · Buy Now"
+                className="w-full h-auto mx-auto"
+                style={{
+                  maxWidth: 760,
+                  borderRadius: 'var(--r-xl)',
+                  boxShadow: '0 22px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.12)',
+                }}
+              />
             </Link>
           </motion.div>
 
-          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:.36 }}
-            className="flex flex-wrap gap-x-10 gap-y-4 mt-12 md:justify-center">
-            {[['7000+','Happy customers'],['500+','Products'],['100%','Licensed']].map(([n,l]) => (
-              <div key={l}>
-                <p className="font-display font-black text-2xl" style={{ color:'#ffd60a' }}>{n}</p>
-                <p className="text-xs font-medium" style={{ color:'rgba(255,255,255,.58)' }}>{l}</p>
-              </div>
-            ))}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: .28 }}
+            className="flex flex-wrap gap-3 justify-center mt-7"
+          >
+            <Link to="/products" className="btn btn-fire btn-lg">
+              Shop Now <ArrowRightIcon className="h-5 w-5" />
+            </Link>
+            <Link to="/combos" className="btn btn-lg"
+              style={{
+                background: 'rgba(255,255,255,.12)', color: '#fff',
+                border: '2px solid rgba(255,255,255,.28)', backdropFilter: 'blur(8px)',
+              }}>
+              <GiftIcon className="h-5 w-5" /> View Combos
+            </Link>
           </motion.div>
         </div>
       </div>
