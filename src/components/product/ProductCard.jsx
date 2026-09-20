@@ -36,8 +36,8 @@ export default function ProductCard({ product, index = 0, compact = false }) {
 
   const { now, was, save, pct, onSale } = priceOf(product);
   const wishlisted = isWishlisted(product.id);
-  const outOfStock = product.stock_qty <= 0;
-  const lowStock   = !outOfStock && product.stock_qty <= 5;
+  const outOfStock = false;
+  const lowStock   = false;
   const img        = product.thumb_url || product.image_url;
   const hasVideo   = !!product.video_url;
 
@@ -155,11 +155,8 @@ export default function ProductCard({ product, index = 0, compact = false }) {
           {!outOfStock ? (
             <div className="mt-2.5 space-y-2">
               {!compact && (
-                <div className="flex items-center justify-between">
-                  <QuantitySelector value={qty} onChange={setQty} max={product.stock_qty} size="sm" />
-                  <span className="text-[.625rem] font-semibold" style={{ color:'var(--text-muted)' }}>
-                    {qtyFmt(product.stock_qty)} left
-                  </span>
+                <div className="flex items-center">
+                  <QuantitySelector value={qty} onChange={setQty} size="sm" />
                 </div>
               )}
               <button onClick={handleAdd}

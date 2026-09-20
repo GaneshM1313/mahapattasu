@@ -160,7 +160,7 @@ export default function CartDrawer() {
                           <div className="flex items-center justify-between mt-2 gap-2">
                             <QuantitySelector value={item.qty}
                               onChange={q => updateQty(item.id, q)}
-                              max={item.stock_qty} size="sm" />
+                              size="sm" />
                             <div className="text-right">
                               <p className="text-sm font-black" style={{ color:'var(--primary-red)' }}>
                                 {fmt(unit * item.qty)}

@@ -10,7 +10,7 @@ import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { useUIStore, useCartStore, useWishlistStore } from '../../store';
 import { shopAPI } from '../../services/api';
 import MediaStage from './MediaStage';
-import { QuantitySelector, qtyFmt } from '../ui';
+import { QuantitySelector } from '../ui';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -48,7 +48,7 @@ export default function ProductModal() {
   const onSale     = media.has_offer && media.offer_price != null;
   const price      = onSale ? parseFloat(media.offer_price) : listPrice;
   const mrp        = media.mrp ? parseFloat(media.mrp) : null;
-  const outOfStock = media.stock_qty <= 0;
+  const outOfStock = false;
   const saving     = onSale ? listPrice - price : (mrp && mrp > listPrice ? mrp - listPrice : 0);
 
   const handleAddToCart = () => {
@@ -107,14 +107,6 @@ export default function ProductModal() {
                   </p>
                 )}
 
-                {/* Stock */}
-                <div className={clsx('flex items-center gap-2 text-sm font-semibold mb-4',
-                  outOfStock ? 'text-red-500' : media.stock_qty <= 5 ? 'text-orange-500' : 'text-green-600')}>
-                  <div className={clsx('w-2 h-2 rounded-full',
-                    outOfStock ? 'bg-red-500' : media.stock_qty <= 5 ? 'bg-orange-500' : 'bg-green-500')}/>
-                  {outOfStock ? 'Out of Stock' : media.stock_qty <= 5 ? `Only ${qtyFmt(media.stock_qty)} left!` : 'In Stock'}
-                </div>
-
                 {loading ? <div className="skeleton h-16 rounded-xl mb-4"/> : detail?.description && (
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">{detail.description}</p>
                 )}
@@ -136,8 +128,7 @@ export default function ProductModal() {
                 {!outOfStock && (
                   <div className="flex items-center gap-4 mb-5">
                     <span className="text-sm font-semibold text-gray-700">Quantity:</span>
-                    <QuantitySelector value={qty} onChange={setQty} max={media.stock_qty} />
-                    <span className="text-sm text-gray-400">({qtyFmt(media.stock_qty)} available)</span>
+                    <QuantitySelector value={qty} onChange={setQty} />
                   </div>
                 )}
 

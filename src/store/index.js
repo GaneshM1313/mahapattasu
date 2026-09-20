@@ -9,10 +9,6 @@ const unitPriceOf = (item) =>
     ? parseFloat(item.offer_price)
     : parseFloat(item.selling_price || 0);
 
-// stock_qty is a decimal(10,3) column, so the API can serialise it as
-// "80.000" — round it for anything shown to the customer.
-const qtyFmt = (n) => Math.round(parseFloat(n) || 0);
-
 // ── Cart Store ─────────────────────────────────────────────────
 export const useCartStore = create(
   persist(
@@ -25,12 +21,8 @@ export const useCartStore = create(
         const items  = get().items;
         const exists = items.find(i => i.id === product.id);
         if (exists) {
-          if (exists.qty + qty > product.stock_qty)
-            return { error: `Only ${qtyFmt(product.stock_qty)} in stock` };
           set({ items: items.map(i => i.id === product.id ? { ...i, qty: i.qty + qty } : i) });
         } else {
-          if (qty > product.stock_qty)
-            return { error: `Only ${qtyFmt(product.stock_qty)} in stock` };
           // product already carries has_offer / offer_price from the API
           set({ items: [...items, { ...product, qty }] });
         }

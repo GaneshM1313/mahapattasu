@@ -19,12 +19,9 @@ import { ProductSkeleton, EmptyState, priceOf } from '../components/ui';
 import toast from 'react-hot-toast';
 
 const SORTS = [
-  { v:'name-ASC',           l:'Name: A → Z' },
-  { v:'name-DESC',          l:'Name: Z → A' },
   { v:'selling_price-ASC',  l:'Price: Low → High' },
   { v:'selling_price-DESC', l:'Price: High → Low' },
   { v:'created_at-DESC',    l:'Newest first' },
-  { v:'stock_qty-DESC',     l:'Most in stock' },
 ];
 
 const PRICE_BANDS = [
@@ -47,10 +44,9 @@ export default function ProductsPage() {
 
   const [search,     setSearch]     = useState(params.get('search') || '');
   const [categoryId, setCategoryId] = useState(params.get('category_id') || '');
-  const [sort,       setSort]       = useState('name-ASC');
+  const [sort,       setSort]       = useState('selling_price-ASC');
   const [page,       setPage]       = useState(1);
   const [band,       setBand]       = useState(null);
-  const [inStockOnly,setInStockOnly]= useState(false);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
 
   useEffect(() => {
@@ -69,7 +65,7 @@ export default function ProductsPage() {
       const r = await shopAPI.getProducts({
         search: search || undefined,
         category_id: categoryId || undefined,
-        sort: sf, order: so, page, limit: 24,
+        sort: sf, order: so, page, limit: 300,
       });
       setProducts(r.data.data || []);
       setPagination(r.data.pagination || {});
@@ -89,16 +85,33 @@ export default function ProductsPage() {
         return now >= band.min && (band.max == null || now <= band.max);
       });
     }
-    if (inStockOnly) list = list.filter(p => p.stock_qty > 0);
     if (onSaleOnly)  list = list.filter(p => priceOf(p).pct >= 5);
     return list;
-  }, [products, band, inStockOnly, onSaleOnly]);
+  }, [products, band, onSaleOnly]);
 
-  const activeCount = [categoryId, band, inStockOnly || null, onSaleOnly || null].filter(Boolean).length;
+  const activeCount = [categoryId, band, onSaleOnly || null].filter(Boolean).length;
+
+  /* Category-wise grouping — when no single category is selected, show
+     products grouped under each category heading instead of one flat
+     alphabetical list, so sizes/variants sit together for comparison. */
+  const grouped = useMemo(() => {
+    if (categoryId) return null;
+    const order = categories.map(c => c.name);
+    const map = new Map();
+    shown.forEach(p => {
+      const k = p.category || 'Other';
+      if (!map.has(k)) map.set(k, []);
+      map.get(k).push(p);
+    });
+    return Array.from(map.entries()).sort((a, b) => {
+      const ia = order.indexOf(a[0]); const ib = order.indexOf(b[0]);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
+    });
+  }, [shown, categoryId, categories]);
 
   const clearAll = () => {
     setSearch(''); setCategoryId(''); setBand(null);
-    setInStockOnly(false); setOnSaleOnly(false); setSort('name-ASC'); setPage(1);
+    setOnSaleOnly(false); setSort('selling_price-ASC'); setPage(1);
     setParams({});
   };
 
@@ -166,7 +179,6 @@ export default function ProductsPage() {
       <div className="card p-4">
         <p className="text-sm font-extrabold mb-3">Availability</p>
         {[
-          ['In stock only', inStockOnly, setInStockOnly],
           ['On sale only',  onSaleOnly,  setOnSaleOnly],
         ].map(([label, val, setter]) => (
           <label key={label} className="flex items-center gap-2.5 py-2 cursor-pointer">
@@ -282,11 +294,36 @@ export default function ProductsPage() {
               />
             ) : (
               <>
-                <div className="pgrid">
-                  {shown.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-                </div>
+                {grouped ? (
+                  <div className="space-y-10">
+                    {grouped.map(([cat, list]) => {
+                      const cid = categories.find(c => c.name === cat)?.id;
+                      return (
+                        <section key={cat}>
+                          <div className="flex items-center gap-3 mb-4">
+                            <h2 className="h-section" style={{ fontSize:'1.35rem' }}>{cat}</h2>
+                            <span style={{ background:'var(--surface-2)', color:'var(--primary-red)', fontWeight:800, fontSize:'.7rem', padding:'3px 10px', borderRadius:999 }}>{list.length}</span>
+                            {cid != null && (
+                              <button onClick={() => chooseCategory(String(cid))}
+                                className="ml-auto text-sm font-bold" style={{ color:'var(--primary-red)' }}>
+                                View all →
+                              </button>
+                            )}
+                          </div>
+                          <div className="pgrid">
+                            {list.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+                          </div>
+                        </section>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="pgrid">
+                    {shown.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+                  </div>
+                )}
 
-                {pagination.pages > 1 && (
+                {!grouped && pagination.pages > 1 && (
                   <div className="flex items-center justify-center gap-2 mt-9">
                     <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page <= 1}
                       className="btn btn-ghost btn-sm">← Prev</button>

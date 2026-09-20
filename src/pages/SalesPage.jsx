@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { salesAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { buildSalesInvoicePdf } from '../utils/invoicePdf';
 import {
   MagnifyingGlassIcon, PrinterIcon, ArrowPathIcon,
   XCircleIcon, CheckCircleIcon, EyeIcon,
@@ -54,8 +55,12 @@ function OrderDetailModal({ saleId, onClose, onStatusChange }) {
   };
 
   const handlePrint = () => {
-    const token = JSON.parse(localStorage.getItem('auth-store') || '{}')?.state?.accessToken;
-    window.open(`http://localhost:5000/api/v1/sales/${saleId}/invoice?token=${token}`, '_blank');
+    if (!sale) return;
+    // Invoice is built on the frontend so its header (shop name, address,
+    // phones) comes from src/config/tenant.js — the master setting.
+    const doc = buildSalesInvoicePdf(sale);
+    doc.autoPrint();
+    window.open(doc.output('bloburl'), '_blank');
   };
 
   return (
@@ -371,9 +376,13 @@ export default function SalesPage() {
                         title="View Details">
                         <EyeIcon className="h-4 w-4"/>
                       </button>
-                      <button onClick={() => {
-                        const token = JSON.parse(localStorage.getItem('auth-store') || '{}')?.state?.accessToken;
-                        window.open(`http://localhost:5000/api/v1/sales/${s.id}/invoice?token=${token}`, '_blank');
+                      <button onClick={async () => {
+                        try {
+                          const r = await salesAPI.getById(s.id);
+                          const doc = buildSalesInvoicePdf(r.data.data);
+                          doc.autoPrint();
+                          window.open(doc.output('bloburl'), '_blank');
+                        } catch { toast.error('Could not open invoice'); }
                       }}
                         className="p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-950 text-green-600"
                         title="Print Invoice">

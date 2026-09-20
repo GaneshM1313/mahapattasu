@@ -16,7 +16,7 @@ import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react
 import { shopAPI } from '../services/api';
 import { useCartStore, useWishlistStore } from '../store';
 import ProductCard from '../components/product/ProductCard';
-import { fmt, qtyFmt, priceOf, Badge, QuantitySelector, Reveal, EmptyState } from '../components/ui';
+import { fmt, priceOf, Badge, QuantitySelector, Reveal, EmptyState } from '../components/ui';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
 
@@ -177,7 +177,7 @@ export default function ProductDetailPage() {
 
   const { now, was, save, pct } = priceOf(product);
   const wishlisted = isWishlisted(product.id);
-  const outOfStock = product.stock_qty <= 0;
+  const outOfStock = false;
 
   const handleAdd = () => {
     if (outOfStock) { toast.error('Out of stock'); return; }
@@ -256,18 +256,6 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Stock */}
-            <div className="flex items-center gap-2 text-sm font-bold mb-5"
-              style={{ color: outOfStock ? 'var(--danger)' : product.stock_qty <= 5 ? 'var(--warning)' : 'var(--success)' }}>
-              <span style={{
-                width:8, height:8, borderRadius:'50%',
-                background: outOfStock ? 'var(--danger)' : product.stock_qty <= 5 ? 'var(--warning)' : 'var(--success)',
-              }} />
-              {outOfStock ? 'Out of stock'
-                : product.stock_qty <= 5 ? `Only ${qtyFmt(product.stock_qty)} left — order soon`
-                : 'In stock, ready to ship'}
-            </div>
-
             {product.description && (
               <p className="text-sm leading-relaxed mb-5" style={{ color:'var(--text-muted)' }}>
                 {product.description}
@@ -278,10 +266,7 @@ export default function ProductDetailPage() {
             {!outOfStock && (
               <div className="hidden lg:block space-y-3 mb-5">
                 <div className="flex items-center gap-3">
-                  <QuantitySelector value={qty} onChange={setQty} max={product.stock_qty} />
-                  <span className="text-xs font-semibold" style={{ color:'var(--text-muted)' }}>
-                    {qtyFmt(product.stock_qty)} available
-                  </span>
+                  <QuantitySelector value={qty} onChange={setQty} />
                 </div>
                 <div className="flex gap-2.5">
                   <button onClick={handleAdd} className="btn btn-fire btn-lg flex-1">
@@ -354,7 +339,7 @@ export default function ProductDetailPage() {
           className="lg:hidden fixed bottom-0 left-0 right-0 z-30 px-4 py-3 safe-bottom"
           style={{ background:'var(--surface)', boxShadow:'0 -4px 22px rgba(157,2,8,.13)' }}>
           <div className="flex items-center gap-2.5">
-            <QuantitySelector value={qty} onChange={setQty} max={product.stock_qty} size="sm" />
+            <QuantitySelector value={qty} onChange={setQty} size="sm" />
             <button onClick={handleAdd} className="btn btn-fire flex-1">
               <ShoppingCartIcon className="h-5 w-5" /> Add · {fmt(now * qty)}
             </button>

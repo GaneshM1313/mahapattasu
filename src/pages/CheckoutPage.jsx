@@ -34,8 +34,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheckIcon, CheckCircleIcon, PhoneIcon, ArrowDownTrayIcon, EnvelopeIcon, BoltIcon, UserPlusIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useCartStore, useAuthStore, useUIStore } from '../store';
+import { ShieldCheckIcon, CheckCircleIcon, PhoneIcon, ArrowDownTrayIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { useCartStore, useAuthStore } from '../store';
 import { shopAPI } from '../services/api';
 import { ADMIN_WHATSAPP_NUMBER, ADMIN_EMAIL, SHOP_NAME } from '../config/tenant';
 import { buildInvoicePdf, pdfToFile } from '../utils/invoicePdf';
@@ -50,18 +50,11 @@ const money = (n) => `Rs. ${Number(n || 0).toLocaleString('en-IN', { maximumFrac
 export default function CheckoutPage() {
   const navigate   = useNavigate();
   const { items, getSubtotal, getTotal, coupon, couponDiscount, clearCart } = useCartStore();
-  const { customer, isLoggedIn, login } = useAuthStore();
-  const { openAuth } = useUIStore();
+  const { customer } = useAuthStore();
   const [loading, setLoading]   = useState(false);
   const [success, setSuccess]   = useState(null);
   const [sharedPdf, setSharedPdf] = useState(false);  // whether native share already handled it
   const [snapshot, setSnapshot] = useState(null);      // order data frozen at submit time, for the confirmation-screen buttons (cart is cleared by then)
-
-  // Guest vs account is the customer's own choice — 'guest' is the
-  // default so the least-friction path is what they get without having
-  // to decide anything. Only matters while they're not already logged in.
-  const [checkoutMode, setCheckoutMode] = useState('guest'); // 'guest' | 'account'
-  const [showPw, setShowPw] = useState(false);
 
   const [form, setForm] = useState({
     name:    customer?.name    || '',
@@ -80,7 +73,6 @@ export default function CheckoutPage() {
   const grandTotal = total; // delivery charge is confirmed by our team on call, not added here
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const wantsAccount = !isLoggedIn && checkoutMode === 'account';
 
   if (items.length === 0 && !success) {
     navigate('/products'); return null;
@@ -162,31 +154,18 @@ export default function CheckoutPage() {
     if (!form.name || !form.phone || !form.address || !form.city || !form.pincode) {
       toast.error('Fill all required fields'); return;
     }
-    if (wantsAccount) {
-      if (!form.password) { toast.error('Set a password to create your account'); return; }
-      if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-      if (form.password !== form.confirm) { toast.error('Passwords do not match'); return; }
-    }
     setLoading(true);
     try {
-      // Create the account first if they opted in — the order placed
-      // right after goes under that new login automatically, so it
-      // shows up in "My Orders" with no extra step for them.
-      if (wantsAccount) {
-        const reg = await shopAPI.register({ name: form.name, phone: form.phone, password: form.password });
-        login(reg.data.data.customer, reg.data.data.token);
-      }
-
       const r = await shopAPI.placeOrder({
         items: items.map(i => ({ product_id: i.id, qty: i.qty })),
         payments: [],
         discount_code: coupon?.name || undefined,
         shipping_address: `${form.address}, ${form.city}, ${form.state} ${form.pincode}`,
         notes: form.notes,
-        // Only meaningful for a guest order — there's no logged-in
-        // customer_id yet, so the backend needs a name/phone to attach
-        // the order to. Omitted once logged in (account or existing).
-        ...(!isLoggedIn && !wantsAccount ? { guest_name: form.name, guest_phone: form.phone } : {}),
+        // No login on this storefront — every order is placed as a guest,
+        // so the backend always gets a name/phone to attach it to.
+        guest_name: form.name,
+        guest_phone: form.phone,
       });
       const data = r.data.data;
 
@@ -220,15 +199,7 @@ export default function CheckoutPage() {
       openWhatsAppText(snap);
       toast.success('Order sent to WhatsApp!', { duration: 2500 });
     } catch (e) {
-      // Guest checkout may not be wired up on the backend yet — rather
-      // than leave them stuck on a failed order, nudge them to the
-      // account path with everything they already typed still in place.
-      if (!isLoggedIn && !wantsAccount && e.response?.status === 401) {
-        setCheckoutMode('account');
-        toast.error('Guest checkout needs a quick free account — just add a password below.');
-      } else {
-        toast.error(e.response?.data?.message || 'Order failed. Please try again.');
-      }
+      toast.error(e.response?.data?.message || 'Order failed. Please try again.');
     } finally { setLoading(false); }
   };
 
@@ -317,71 +288,12 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
 
-            {!isLoggedIn && (
-              <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
-                className="bg-white rounded-2xl p-6 border border-gray-100">
-                <h2 className="font-bold text-gray-800 text-lg mb-1">How would you like to checkout?</h2>
-                <p className="text-xs text-gray-400 mb-4">Your call — either way, your order reaches us the same way.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setCheckoutMode('guest')}
-                    className="text-left p-4 rounded-xl border-2 transition-colors"
-                    style={{
-                      borderColor: checkoutMode === 'guest' ? 'var(--primary-red)' : '#e5e7eb',
-                      background:  checkoutMode === 'guest' ? 'var(--surface-2)' : '#fff',
-                    }}>
-                    <p className="font-bold text-sm mb-1 flex items-center gap-1.5">
-                      <BoltIcon className="h-4 w-4 text-orange-500" /> Quick Guest Checkout
-                    </p>
-                    <p className="text-xs text-gray-500">Just place your order — no account needed</p>
-                  </button>
-                  <button type="button" onClick={() => setCheckoutMode('account')}
-                    className="text-left p-4 rounded-xl border-2 transition-colors"
-                    style={{
-                      borderColor: checkoutMode === 'account' ? 'var(--primary-red)' : '#e5e7eb',
-                      background:  checkoutMode === 'account' ? 'var(--surface-2)' : '#fff',
-                    }}>
-                    <p className="font-bold text-sm mb-1 flex items-center gap-1.5">
-                      <UserPlusIcon className="h-4 w-4 text-red-500" /> Create Account
-                    </p>
-                    <p className="text-xs text-gray-500">Track this order & save details for next time</p>
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400 mt-4">
-                  Already have an account?{' '}
-                  <button type="button" onClick={() => openAuth('login')} className="font-bold" style={{ color:'var(--primary-red)' }}>
-                    Sign in
-                  </button>
-                </p>
-              </motion.div>
-            )}
-
             <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} className="bg-white rounded-2xl p-6 border border-gray-100">
               <h2 className="font-bold text-gray-800 text-lg mb-5">Delivery Address</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2"><label className="shop-label">Full Name *</label><input value={form.name} onChange={e => set('name', e.target.value)} className="shop-input" placeholder="Your full name" required/></div>
                 <div className="col-span-2 sm:col-span-1"><label className="shop-label">Phone *</label><input value={form.phone} onChange={e => set('phone', e.target.value)} className="shop-input" placeholder="10-digit number" required/></div>
                 <div className="col-span-2 sm:col-span-1"><label className="shop-label">Pincode *</label><input value={form.pincode} onChange={e => set('pincode', e.target.value)} className="shop-input" placeholder="6-digit pincode" required/></div>
-
-                {wantsAccount && (
-                  <>
-                    <div className="col-span-2 sm:col-span-1">
-                      <label className="shop-label">Set Password *</label>
-                      <div className="relative">
-                        <input type={showPw ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)}
-                          className="shop-input" placeholder="At least 6 characters" required/>
-                        <button type="button" onClick={() => setShowPw(v => !v)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                          {showPw ? <EyeSlashIcon className="h-4 w-4"/> : <EyeIcon className="h-4 w-4"/>}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-span-2 sm:col-span-1">
-                      <label className="shop-label">Confirm Password *</label>
-                      <input type={showPw ? 'text' : 'password'} value={form.confirm} onChange={e => set('confirm', e.target.value)}
-                        className="shop-input" placeholder="Re-enter password" required/>
-                    </div>
-                  </>
-                )}
 
                 <div className="col-span-2"><label className="shop-label">Full Address *</label><textarea value={form.address} onChange={e => set('address', e.target.value)} className="shop-input h-20 resize-none" placeholder="House/Flat No., Street, Area..." required/></div>
                 <div><label className="shop-label">City *</label><input value={form.city} onChange={e => set('city', e.target.value)} className="shop-input" placeholder="City" required/></div>
@@ -390,7 +302,7 @@ export default function CheckoutPage() {
               </div>
               <button onClick={handlePlaceOrder} disabled={loading}
                 className="w-full btn-brand mt-5 justify-center py-3.5 text-base disabled:opacity-60">
-                {loading ? 'Placing Order...' : wantsAccount ? `Create Account & Place Order — ${fmt(grandTotal)}` : `Place Order — ${fmt(grandTotal)}`}
+                {loading ? 'Placing Order...' : `Place Order — ${fmt(grandTotal)}`}
               </button>
               <p className="text-xs text-gray-400 mt-3 text-center">
                 We'll send your order PDF to our team and call you to confirm — no payment needed now.

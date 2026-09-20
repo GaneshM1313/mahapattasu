@@ -7,7 +7,7 @@
 
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
-import { SHOP_NAME, SHOP_ADDRESS_LINES, SHOP_PHONES, ADMIN_EMAIL } from '../config/tenant';
+import { SHOP_NAME, SHOP_TAGLINE, SHOP_ADDRESS_LINES, SHOP_PHONES, ADMIN_EMAIL } from '../config/tenant';
 
 const inr = (n) => `Rs. ${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
@@ -146,6 +146,150 @@ export function buildInvoicePdf({ orderId, customer, items, subtotal, coupon, to
   doc.text('Delivery charge depends on location & parcel weight — confirmed by our team on call.', margin, ty);
   ty += 12;
   doc.text('This is a computer-generated order summary, not a tax invoice.', margin, ty);
+
+  return doc;
+}
+
+
+/**
+ * Sales / POS invoice. The shop identity in the header (name, address,
+ * phones, email) comes straight from src/config/tenant.js — the master
+ * setting — so changing SHOP_NAME there changes every printed invoice.
+ * @param {object} sale  a sale record from salesAPI.getById (invoice_no,
+ *   customer_name, customer_phone, sale_date, status, items[], subtotal,
+ *   discount_amt, tax_amt, total_amt, payments[])
+ * @returns {jsPDF}
+ */
+export function buildSalesInvoicePdf(sale = {}) {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const pageW  = doc.internal.pageSize.getWidth();
+  const margin = 40;
+  const rightX = pageW - margin;
+  const num = (n) => Number(parseFloat(n) || 0);
+
+  // ── Header — identity from config/tenant.js (master setting) ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(217, 4, 41);
+  doc.text(SHOP_NAME, margin, 48);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`${SHOP_TAGLINE} - Licensed Fireworks`, margin, 64);
+  const addrLines = SHOP_ADDRESS_LINES.map(l => l.replace(/\u2013/g, '-'));
+  doc.text(addrLines, margin, 78);
+  let leftY = 78 + addrLines.length * 11 + 4;
+  doc.text(`Phone: ${SHOP_PHONES.join('  -  ')}`, margin, leftY);
+  if (ADMIN_EMAIL) { leftY += 13; doc.text(`Email: ${ADMIN_EMAIL}`, margin, leftY); }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(20, 20, 20);
+  doc.text('TAX INVOICE', rightX, 48, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Invoice: ${sale.invoice_no || '-'}`, rightX, 64, { align: 'right' });
+  const dt = sale.sale_date ? new Date(sale.sale_date).toLocaleString('en-IN') : new Date().toLocaleString('en-IN');
+  doc.text(`Date: ${dt}`, rightX, 76, { align: 'right' });
+  if (sale.status) doc.text(`Status: ${String(sale.status).toUpperCase()}`, rightX, 88, { align: 'right' });
+
+  const headerBottom = Math.max(leftY + 20, 104);
+  doc.setDrawColor(230, 230, 230);
+  doc.line(margin, headerBottom, rightX, headerBottom);
+
+  // ── Bill To ──
+  let y = headerBottom + 22;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(20, 20, 20);
+  doc.text('BILL TO', margin, y);
+  y += 15;
+  doc.setFont('helvetica', 'normal');
+  doc.text(sale.customer_name || 'Walk-in', margin, y); y += 13;
+  if (sale.customer_phone) { doc.text(String(sale.customer_phone), margin, y); y += 13; }
+
+  // ── Items ──
+  const items = sale.items || [];
+  autoTable(doc, {
+    startY: y + 12,
+    margin: { left: margin, right: margin },
+    head: [['#', 'Item', 'Qty', 'Rate', 'Tax', 'Amount']],
+    body: items.map((it, i) => [
+      String(i + 1),
+      it.product_name || it.name || '',
+      String(num(it.qty)),
+      inr(it.unit_price),
+      inr(it.tax_amt),
+      inr(it.total_amt != null ? it.total_amt : num(it.unit_price) * num(it.qty)),
+    ]),
+    styles: { fontSize: 9, cellPadding: 6, textColor: [30, 30, 30] },
+    headStyles: { fillColor: [217, 4, 41], textColor: 255, fontStyle: 'bold' },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 26 },
+      2: { halign: 'center', cellWidth: 42 },
+      3: { halign: 'right',  cellWidth: 78 },
+      4: { halign: 'right',  cellWidth: 64 },
+      5: { halign: 'right',  cellWidth: 82 },
+    },
+    alternateRowStyles: { fillColor: [250, 246, 244] },
+    didParseCell: (data) => {
+      if (data.section === 'head') {
+        const c = data.column.index;
+        if (c === 0 || c === 2) data.cell.styles.halign = 'center';
+        if (c >= 3) data.cell.styles.halign = 'right';
+      }
+    },
+  });
+
+  let ty = doc.lastAutoTable.finalY + 22;
+  const labelX = rightX - 170;
+  const row = (label, value, bold = false, color = [80, 80, 80]) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFontSize(bold ? 12 : 10);
+    doc.setTextColor(...color);
+    doc.text(label, labelX, ty);
+    doc.text(value, rightX, ty, { align: 'right' });
+    ty += bold ? 18 : 15;
+  };
+
+  row('Subtotal', inr(sale.subtotal));
+  if (num(sale.discount_amt) > 0) row('Discount', `- ${inr(sale.discount_amt)}`, false, [15, 157, 88]);
+  if (num(sale.tax_amt) > 0)      row('GST', inr(sale.tax_amt));
+  doc.setDrawColor(220, 220, 220);
+  doc.line(labelX, ty, rightX, ty);
+  ty += 14;
+  row('Total', inr(sale.total_amt), true, [217, 4, 41]);
+
+  // ── Payments ──
+  const pays = sale.payments || [];
+  if (pays.length) {
+    ty += 12;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(20, 20, 20);
+    doc.text('Payments', labelX, ty); ty += 15;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(80, 80, 80);
+    let paid = 0;
+    pays.forEach(p => {
+      paid += num(p.amount);
+      doc.text(p.method_name || 'Cash', labelX, ty);
+      doc.text(inr(p.amount), rightX, ty, { align: 'right' });
+      ty += 14;
+    });
+    const bal = num(sale.total_amt) - paid;
+    if (bal > 0) {
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(217, 4, 41);
+      doc.text('Balance', labelX, ty);
+      doc.text(inr(bal), rightX, ty, { align: 'right' });
+      ty += 16;
+    }
+  }
+
+  ty += 20;
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8.5);
+  doc.setTextColor(130, 130, 130);
+  doc.text('Thank you for your purchase. Goods once sold are subject to shop policy.', margin, ty);
 
   return doc;
 }
