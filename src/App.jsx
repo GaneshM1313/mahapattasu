@@ -10,7 +10,6 @@ import { Toaster } from 'react-hot-toast';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
-import AuthModal from './components/auth/AuthModal';
 import ProductModal from './components/product/ProductModal';
 import WhatsAppButton from './components/common/WhatsAppButton';
 import ScrollToTop from './components/common/ScrollToTop';
@@ -82,7 +81,6 @@ export default function App() {
 
         <Footer />
         <CartDrawer />
-        <AuthModal />
         <ProductModal />
         <WhatsAppButton />
       </div>

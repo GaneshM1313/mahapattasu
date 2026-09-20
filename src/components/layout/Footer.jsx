@@ -13,9 +13,8 @@ const GROUPS = [
     ['All Products','/products'], ['Combos','/products?combo=1'],
     ['Offers','/offers'], ['Price List','/price-list'],
   ]},
-  { title:'Account', links:[
-    ['My Orders','/orders'], ['Wishlist','/wishlist'],
-    ['Profile','/profile'], ['Cart','/products'],
+  { title:'Quick Links', links:[
+    ['Wishlist','/wishlist'], ['Cart','/products'],
   ]},
   { title:'Company', links:[
     ['About Us','/about'], ['Contact','/contact'],

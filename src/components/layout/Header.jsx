@@ -12,10 +12,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  MagnifyingGlassIcon, ShoppingBagIcon, HeartIcon, UserIcon,
+  MagnifyingGlassIcon, ShoppingBagIcon, HeartIcon,
   Bars3Icon, XMarkIcon, ArrowRightIcon,
 } from '@heroicons/react/24/outline';
-import { useCartStore, useAuthStore, useUIStore, useWishlistStore } from '../../store';
+import { useCartStore, useUIStore, useWishlistStore } from '../../store';
 import { shopAPI } from '../../services/api';
 import AnnouncementBar from './AnnouncementBar';
 import { fmt, priceOf } from '../ui';
@@ -24,7 +24,7 @@ import { SHOP_NAME, SHOP_TAGLINE, SHOP_PHONES } from '../../config/tenant';
 const NAV = [
   ['Home',       '/'],
   ['Shop',       '/products'],
-  ['Combos',     '/combos'],
+  ['Combos',     '/products?combo=1'],
   ['Offers',     '/offers'],
   ['Price List', '/price-list'],
   ['About',      '/about'],
@@ -34,8 +34,7 @@ export default function Header() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { getCount }                    = useCartStore();
-  const { isLoggedIn, customer, logout } = useAuthStore();
-  const { openCart, openAuth }          = useUIStore();
+  const { openCart }                    = useUIStore();
   const wishCount = useWishlistStore(s => s.items.length);
 
   const [scrolled,   setScrolled]   = useState(false);
@@ -43,10 +42,8 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [q,          setQ]          = useState('');
   const [sugg,       setSugg]       = useState([]);
-  const [userMenu,   setUserMenu]   = useState(false);
   const [bump,       setBump]       = useState(false);
 
-  const userRef   = useRef(null);
   const searchRef = useRef(null);
   const count     = getCount();
   const prevCount = useRef(count);
@@ -68,19 +65,13 @@ export default function Header() {
   }, []);
 
   /* Close everything on navigation */
-  useEffect(() => { setDrawer(false); setSearchOpen(false); setUserMenu(false); }, [location.pathname]);
+  useEffect(() => { setDrawer(false); setSearchOpen(false); }, [location.pathname]);
 
   /* Lock body scroll while the drawer is open */
   useEffect(() => {
     document.body.style.overflow = drawer ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [drawer]);
-
-  useEffect(() => {
-    const h = e => { if (userRef.current && !userRef.current.contains(e.target)) setUserMenu(false); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, []);
 
   /* Debounced suggestions */
   useEffect(() => {
@@ -266,48 +257,7 @@ export default function Header() {
                 )}
               </button>
 
-              {isLoggedIn ? (
-                <div className="relative" ref={userRef}>
-                  <button onClick={() => setUserMenu(v => !v)}
-                    className="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-xl transition-colors"
-                    style={{ background: userMenu ? 'var(--surface-2)' : 'transparent' }}>
-                    <span className="flex items-center justify-center text-white font-extrabold flex-shrink-0"
-                      style={{ width:30, height:30, borderRadius:'50%', background:'var(--grad-ember)', fontSize:12 }}>
-                      {customer?.name?.charAt(0)?.toUpperCase()}
-                    </span>
-                    <span className="hidden lg:block text-sm font-bold max-w-[70px] truncate">
-                      {customer?.name?.split(' ')[0]}
-                    </span>
-                  </button>
-                  <AnimatePresence>
-                    {userMenu && (
-                      <motion.div initial={{ opacity:0, y:6, scale:.97 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0 }}
-                        className="absolute right-0 top-12 w-52 overflow-hidden z-50"
-                        style={{ background:'var(--surface)', borderRadius:'var(--r-md)', boxShadow:'var(--sh-xl)' }}>
-                        <div className="px-4 py-3" style={{ background:'var(--surface-2)' }}>
-                          <p className="text-sm font-bold truncate">{customer?.name}</p>
-                          <p className="text-xs" style={{ color:'var(--text-muted)' }}>{customer?.phone}</p>
-                        </div>
-                        {[['My Profile','/profile'],['My Orders','/orders'],['Wishlist','/wishlist']].map(([l,p]) => (
-                          <Link key={p} to={p} className="flex px-4 py-3 text-sm font-semibold hover:bg-[var(--surface-2)]">
-                            {l}
-                          </Link>
-                        ))}
-                        <button onClick={() => { logout(); setUserMenu(false); navigate('/'); }}
-                          className="w-full text-left px-4 py-3 text-sm font-bold"
-                          style={{ color:'var(--primary-red)' }}>
-                          Sign Out
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <button onClick={() => openAuth('login')} className="btn btn-fire btn-sm ml-1">
-                  <UserIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Login</span>
-                </button>
-              )}
+
             </div>
           </div>
         </div>
@@ -391,22 +341,7 @@ export default function Header() {
                 ))}
 
                 <div className="my-3 mx-4 divider-fire" />
-
-                {isLoggedIn ? (
-                  <>
-                    {[['My Orders','/orders'],['Wishlist','/wishlist'],['Profile','/profile']].map(([l,p]) => (
-                      <Link key={p} to={p} className="flex px-4 py-3.5 rounded-xl text-sm font-bold">{l}</Link>
-                    ))}
-                    <button onClick={() => { logout(); setDrawer(false); navigate('/'); }}
-                      className="w-full text-left px-4 py-3.5 rounded-xl text-sm font-bold"
-                      style={{ color:'var(--primary-red)' }}>Sign Out</button>
-                  </>
-                ) : (
-                  <button onClick={() => { openAuth('login'); setDrawer(false); }}
-                    className="btn btn-fire w-full mt-1">
-                    <UserIcon className="h-4 w-4" /> Login / Register
-                  </button>
-                )}
+                <Link to="/wishlist" className="flex px-4 py-3.5 rounded-xl text-sm font-bold">Wishlist</Link>
               </nav>
 
               <div className="p-4 flex-shrink-0" style={{ background:'var(--surface-2)' }}>

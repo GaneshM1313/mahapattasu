@@ -269,7 +269,6 @@ export default function CheckoutPage() {
           </p>
 
           <div className="flex gap-3">
-            <button onClick={() => navigate('/orders')} className="flex-1 btn-outline py-3 rounded-xl text-sm">My Orders</button>
             <button onClick={() => navigate('/products')} className="flex-1 btn-brand py-3 text-sm">Continue Shopping</button>
           </div>
         </motion.div>

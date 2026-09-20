@@ -11,20 +11,19 @@ import {
   XMarkIcon, TrashIcon, ShoppingBagIcon, TagIcon,
   ArrowRightIcon, TruckIcon,
 } from '@heroicons/react/24/outline';
-import { useCartStore, useUIStore, useAuthStore } from '../../store';
+import { useCartStore, useUIStore } from '../../store';
 import { shopAPI } from '../../services/api';
 import { fmt, QuantitySelector, Sparks } from '../ui';
 import toast from 'react-hot-toast';
 
 export default function CartDrawer() {
   const cartOpen = useUIStore(s => s.cartOpen);
-  const { closeCart, openAuth } = useUIStore();
+  const { closeCart } = useUIStore();
   const {
     items, removeItem, updateQty, clearCart,
     getSubtotal, getListSubtotal, getSaleDiscount, getTotal, getTotalSavings,
     coupon, applyCoupon, removeCoupon, getUnitPrice,
   } = useCartStore();
-  const { isLoggedIn } = useAuthStore();
   const navigate = useNavigate();
 
   const [code, setCode]       = useState('');
@@ -50,7 +49,7 @@ export default function CartDrawer() {
   };
 
   const checkout = () => {
-    if (!isLoggedIn) { closeCart(); openAuth('login'); toast('Please login to place your order'); return; }
+    // No login on this storefront — go straight to guest checkout.
     closeCart(); navigate('/checkout');
   };
 

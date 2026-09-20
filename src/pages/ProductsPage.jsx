@@ -297,18 +297,11 @@ export default function ProductsPage() {
                 {grouped ? (
                   <div className="space-y-10">
                     {grouped.map(([cat, list]) => {
-                      const cid = categories.find(c => c.name === cat)?.id;
                       return (
                         <section key={cat}>
                           <div className="flex items-center gap-3 mb-4">
                             <h2 className="h-section" style={{ fontSize:'1.35rem' }}>{cat}</h2>
                             <span style={{ background:'var(--surface-2)', color:'var(--primary-red)', fontWeight:800, fontSize:'.7rem', padding:'3px 10px', borderRadius:999 }}>{list.length}</span>
-                            {cid != null && (
-                              <button onClick={() => chooseCategory(String(cid))}
-                                className="ml-auto text-sm font-bold" style={{ color:'var(--primary-red)' }}>
-                                View all →
-                              </button>
-                            )}
                           </div>
                           <div className="pgrid">
                             {list.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
