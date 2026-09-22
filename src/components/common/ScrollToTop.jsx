@@ -25,6 +25,10 @@ export default function ScrollToTop() {
   }, []);
 
   useEffect(() => {
+    // The Shop page (/products) manages its own scroll so it can restore
+    // the previous position on Back/Forward — don't force it to the top.
+    if (pathname === '/products') return;
+
     // Set scrollTop directly on both possible scroll containers
     // (different browsers use documentElement vs body) — more
     // reliable on mobile than window.scrollTo alone, and avoids any

@@ -6,8 +6,8 @@
 // All existing query params still work (search, category_id), so
 // links from the header, categories and hero keep functioning.
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from 'react';
+import { useSearchParams, useNavigationType } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MagnifyingGlassIcon, AdjustmentsHorizontalIcon, XMarkIcon,
@@ -48,6 +48,50 @@ export default function ProductsPage() {
   const [page,       setPage]       = useState(1);
   const [band,       setBand]       = useState(null);
   const [onSaleOnly, setOnSaleOnly] = useState(false);
+
+  // ── Scroll-position memory (Shop page only) ──────────────────────
+  // Save the exact scroll offset while browsing, and restore it when the
+  // user returns Back/Forward from a product-detail page — so the list
+  // reopens at the same category/section instead of jumping to the top.
+  const navType  = useNavigationType();          // 'POP' on Back/Forward
+  const restored = useRef(false);
+  const SCROLL_KEY = 'shopScrollY';
+
+  // Fresh visits (Shop link, filter changes) start at the top, no flash.
+  useLayoutEffect(() => {
+    if (navType !== 'POP') window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Continuously remember where we are on the page.
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { sessionStorage.setItem(SCROLL_KEY, String(window.scrollY)); ticking = false; });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      sessionStorage.setItem(SCROLL_KEY, String(window.scrollY)); // final capture on leave
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  // Restore only after the product list has rendered (page tall enough),
+  // and only when arriving via Back/Forward.
+  useEffect(() => {
+    if (loading || restored.current) return;
+    restored.current = true;
+    if (navType === 'POP') {
+      const y = Number(sessionStorage.getItem(SCROLL_KEY) || 0);
+      if (y > 0) {
+        requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
+        setTimeout(() => window.scrollTo(0, y), 120); // second pass after images settle
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, navType]);
 
   useEffect(() => {
     // Only show categories that actually have products for this tenant —
