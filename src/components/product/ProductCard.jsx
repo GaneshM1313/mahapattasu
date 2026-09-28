@@ -8,7 +8,6 @@
 // from the store-wide sale; `mrp` drives the fallback discount badge.
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ShoppingCartIcon, HeartIcon, EyeIcon, PlayIcon, StarIcon,
@@ -26,7 +25,6 @@ const EMOJI = { none:'✨', division1:'🧨', division2:'🎆', division3:'🎇'
 const ratingFor = (id) => (4.3 + ((id * 7) % 7) / 10).toFixed(1);
 
 export default function ProductCard({ product, index = 0, compact = false }) {
-  const navigate = useNavigate();
   const { addItem } = useCartStore();
   const { toggle, isWishlisted } = useWishlistStore();
   const { openProduct } = useUIStore();
@@ -64,7 +62,7 @@ export default function ProductCard({ product, index = 0, compact = false }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.035, 0.3), duration: .4 }}
       className="pcard"
-      onClick={() => navigate(`/product/${product.id}`)}
+      onClick={() => openProduct(product)}
       style={compact ? { width: 168 } : undefined}
     >
       {/* ── Image ── */}

@@ -34,7 +34,7 @@ export default function Header() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { getCount }                    = useCartStore();
-  const { openCart }                    = useUIStore();
+  const { openCart, openProduct }       = useUIStore();
   const wishCount = useWishlistStore(s => s.items.length);
 
   const [scrolled,   setScrolled]   = useState(false);
@@ -214,7 +214,7 @@ export default function Header() {
                   onBlur={e  => { e.target.style.borderColor = 'transparent'; e.target.style.background='var(--surface-2)'; }}
                 />
               </form>
-              <SuggestionList onPick={p => { navigate(`/product/${p.id}`); setQ(''); setSugg([]); }} />
+              <SuggestionList onPick={p => { openProduct(p); setQ(''); setSugg([]); }} />
             </div>
 
             {/* Actions */}
@@ -275,7 +275,7 @@ export default function Header() {
                   <input ref={searchRef} autoFocus value={q} onChange={e => setQ(e.target.value)}
                     placeholder="Search products…" className="field pl-10" />
                 </form>
-                <SuggestionList onPick={p => { navigate(`/product/${p.id}`); setQ(''); setSugg([]); setSearchOpen(false); }} />
+                <SuggestionList onPick={p => { openProduct(p); setQ(''); setSugg([]); setSearchOpen(false); }} />
               </div>
             </motion.div>
           )}

@@ -19,7 +19,7 @@ export default function WhatsAppButton() {
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.95 }}
       aria-label="Chat with us on WhatsApp"
-      className="fixed bottom-5 right-5 z-40 flex items-center justify-center w-14 h-14 rounded-full shadow-2xl"
+      className="fab-float fixed bottom-5 right-5 z-40 flex items-center justify-center w-14 h-14 rounded-full shadow-2xl"
       style={{ background: '#25D366' }}
     >
       {/* Pulse ring */}

@@ -1,4 +1,4 @@
-// mahapattasu-shop/src/components/product/ProductModal.jsx
+// MM-BharathiCrackers-shop/src/components/product/ProductModal.jsx
 //
 // Quick-view modal. The media area is now the MediaStage slider —
 // image by default, swipe left for video when one exists.
@@ -63,20 +63,24 @@ export default function ProductModal() {
         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
           onClick={closeProduct} className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"/>
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ scale:0.9, opacity:0 }} animate={{ scale:1, opacity:1 }} exit={{ scale:0.9, opacity:0 }}
-            transition={{ type:'spring', damping:25 }}
-            className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        {/* Mobile: slides up as a bottom sheet · Desktop: centred card */}
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 pointer-events-none">
+          <motion.div initial={{ y:60, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:60, opacity:0 }}
+            transition={{ type:'spring', damping:28, stiffness:320 }}
+            className="relative pointer-events-auto w-full max-w-2xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+            <div className="sm:hidden flex justify-center pt-2.5 pb-1 flex-shrink-0">
+              <span className="block w-10 h-1.5 rounded-full bg-gray-200" />
+            </div>
 
             <button onClick={closeProduct}
-              className="absolute top-4 right-4 z-20 p-2 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg">
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 p-2 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg">
               <XMarkIcon className="h-5 w-5 text-gray-700"/>
             </button>
 
             <div className="flex flex-col md:flex-row overflow-y-auto">
 
               {/* ── Media slider ── */}
-              <div className="md:w-2/5 p-4 flex-shrink-0">
+              <div className="md:w-2/5 p-4 flex-shrink-0 w-full max-w-[340px] mx-auto md:max-w-none">
                 <MediaStage product={media} />
               </div>
 
