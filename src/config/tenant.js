@@ -11,8 +11,8 @@
 // references these constants is src/services/api.js.
 
 
-export const TENANT_ID = 4;
-export const BRANCH_ID = 7;
+export const TENANT_ID = 5;
+export const BRANCH_ID = 8;
 export const TENANT_NAME = 'Sri Mahalakshmi Pyro';
 
 // ── Business identity ─────────────────────────────────────────────

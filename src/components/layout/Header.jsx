@@ -25,7 +25,6 @@ const NAV = [
   ['Home',       '/'],
   ['Shop',       '/products'],
   ['Combos',     '/combos'],
-  ['Offers',     '/offers'],
   ['Price List', '/price-list'],
   ['About',      '/about'],
 ];
