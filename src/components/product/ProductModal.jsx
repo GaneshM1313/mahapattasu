@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XMarkIcon, ShoppingCartIcon, HeartIcon, ShieldCheckIcon, TruckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ShoppingCartIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { useUIStore, useCartStore, useWishlistStore } from '../../store';
 import { shopAPI } from '../../services/api';
@@ -115,18 +115,6 @@ export default function ProductModal() {
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">{detail.description}</p>
                 )}
 
-                {/* Safety */}
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 mb-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheckIcon className="h-4 w-4 text-orange-600"/>
-                    <span className="text-xs font-bold text-orange-700">Safety Information</span>
-                  </div>
-                  <p className="text-xs text-orange-600">
-                    {media.hazard_class === 'none'
-                      ? 'Safe for all ages. Handle with care.'
-                      : `Hazard Class: ${String(media.hazard_class).toUpperCase()}. Keep away from fire. Use only under adult supervision.`}
-                  </p>
-                </div>
 
                 {/* Qty */}
                 {!outOfStock && (
@@ -151,17 +139,6 @@ export default function ProductModal() {
                   </button>
                 </div>
 
-                {/* Perks */}
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {[
-                    { icon: TruckIcon,       text: 'Delivery across Tamil Nadu' },
-                    { icon: ShieldCheckIcon, text: 'Licensed & certified' },
-                  ].map(({ icon: Icon, text }) => (
-                    <div key={text} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-xl p-2.5">
-                      <Icon className="h-4 w-4 text-red-400 flex-shrink-0"/>{text}
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
 

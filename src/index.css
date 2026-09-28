@@ -687,7 +687,7 @@ input[placeholder*="search"] {
 .plv-chip { display: inline-flex; align-items: center; gap: 4px; background: #f6f1f3; color: #4e444a;
   font-size: .75rem; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
 .plv-chip-green { background: var(--success-bg); color: #0b7a45; font-weight: 800; }
-.plv-detail-desc { font-size: .875rem; line-height: 1.6; color: #4e444a; margin: 0 0 12px; }
+.plv-detail-desc { font-size: .875rem; line-height: 1.6; color: #4e444a; margin: 0 0 14px; }
 .plv-detail-safety {
   display: flex; gap: 8px; align-items: flex-start; font-size: .75rem; font-weight: 600; line-height: 1.45;
   background: #fff5e8; color: #a14b00; border: 1px solid #ffdcb0; border-radius: 12px; padding: 10px 12px; margin-bottom: 14px;

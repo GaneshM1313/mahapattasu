@@ -91,7 +91,7 @@ export default function Header() {
 
   const Logo = ({ compact }) => (
     <Link to="/" className="flex items-center gap-2.5 flex-shrink-0" aria-label="Home">
-      <div className="flex items-center justify-center flex-shrink-0"
+      <div className="hidden sm:flex items-center justify-center flex-shrink-0"
         style={{
           width: 40, height: 40, borderRadius: 12,
           background: 'var(--grad-fire)', boxShadow: 'var(--sh-glow)',
@@ -112,11 +112,11 @@ export default function Header() {
         </svg>
       </div>
       {!compact && (
-        <div className="hidden sm:block leading-none">
-          <p className="font-display font-black text-[15px]" style={{ color:'var(--text)' }}>
+        <div className="block leading-none min-w-0">
+          <p className="font-display font-black text-[17px] sm:text-[15px] truncate" style={{ color:'var(--text)' }}>
             {SHOP_NAME}
           </p>
-          <p style={{ fontSize:'.563rem', fontWeight:800, letterSpacing:'.14em', color:'var(--festival-orange)' }}>
+          <p className="mt-1 sm:mt-0" style={{ fontSize:'.563rem', fontWeight:800, letterSpacing:'.14em', color:'var(--festival-orange)' }}>
             {SHOP_TAGLINE}
           </p>
         </div>

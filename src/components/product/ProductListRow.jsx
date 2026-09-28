@@ -9,7 +9,7 @@
 //
 // Tapping the row does NOT navigate away any more. It expands an inline
 // detail panel right under the row (image/video slider, description,
-// safety info, wishlist), so the customer never loses their place in
+// quantity, wishlist), so the customer never loses their place in
 // the list.
 //
 // Quantity here is the CART quantity — the stepper starts at 0 and
@@ -19,7 +19,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronDownIcon, XMarkIcon, ShieldCheckIcon, TruckIcon, HeartIcon,
+  ChevronDownIcon, XMarkIcon, HeartIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 import { useCartStore, useWishlistStore } from '../../store';
@@ -145,9 +145,6 @@ function InlineDetail({ product, onClose }) {
 
           <div className="plv-detail-chips">
             <span className="plv-chip">📦 {contentOf(media)}</span>
-            {media.hazard_class && media.hazard_class !== 'none' && (
-              <span className="plv-chip">⚠️ {String(media.hazard_class).toUpperCase()}</span>
-            )}
             {media.video_url && <span className="plv-chip">▶ Swipe image for video</span>}
           </div>
 
@@ -156,15 +153,6 @@ function InlineDetail({ product, onClose }) {
           ) : media.description ? (
             <p className="plv-detail-desc">{media.description}</p>
           ) : null}
-
-          <div className="plv-detail-safety">
-            <ShieldCheckIcon className="h-4 w-4 flex-shrink-0" />
-            <span>
-              {media.hazard_class === 'none' || !media.hazard_class
-                ? 'Safe for all ages. Handle with care.'
-                : 'Keep away from fire. Light from a distance, use only under adult supervision.'}
-            </span>
-          </div>
 
           <div className="plv-detail-actions">
             <div className="plv-detail-qty">
@@ -181,11 +169,6 @@ function InlineDetail({ product, onClose }) {
               aria-label={wished ? 'Remove from wishlist' : 'Save to wishlist'}>
               {wished ? <HeartSolid className="h-5 w-5" /> : <HeartIcon className="h-5 w-5" />}
             </button>
-          </div>
-
-          <div className="plv-detail-perks">
-            <span><TruckIcon className="h-4 w-4" /> Delivery across Tamil Nadu</span>
-            <span><ShieldCheckIcon className="h-4 w-4" /> Licensed & certified</span>
           </div>
         </div>
       </div>
