@@ -82,7 +82,7 @@ export default function ProductsPage() {
     shopAPI.getProducts({
       search: query || undefined,
       category_id: categoryId || undefined,
-      sort: 'selling_price', order: 'ASC', page: 1, limit: 300,
+      sort: 'display', page: 1, limit: 300,
     })
       .then(r => {
         if (!alive) return;
